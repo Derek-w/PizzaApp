@@ -17,21 +17,27 @@ class TopPizzasViewController: UIViewController, UISearchBarDelegate{
     var pizzas: [(Pizza, Int)] = []
     var order = "Descending"
     var isSearching = false
+    var start = true
     var allPizzas: [(Pizza, Int)] = []
+    var searchText: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        searchBar.delegate = self
-        searchBar.returnKeyType = UIReturnKeyType.done
         PizzaService.getPizzas() { [unowned self] pizzas in
             self.allPizzas = pizzas
+            self.fetchPizzas(count: Preferences.pizzaCount, order: self.order)
         }
-        fetchPizzas(count: Preferences.pizzaCount, order: order)
+        searchBar.delegate = self
+        searchBar.returnKeyType = UIReturnKeyType.done
     }
         
     @IBAction func orderChanged(_ sender: UISegmentedControl) {
         order = sender.titleForSegment(at: sender.selectedSegmentIndex)!
-        fetchPizzas(count: Preferences.pizzaCount, order: order)
+        if isSearching {
+            searchBar(searchBar, textDidChange: searchText)
+        } else {
+            fetchPizzas(count: Preferences.pizzaCount, order: order)
+        }
     }
     
     func fetchPizzas(count: Int, order: String){
@@ -45,19 +51,14 @@ class TopPizzasViewController: UIViewController, UISearchBarDelegate{
         }
         let end = min(count, self.pizzas.count)
         self.pizzas = Array(self.pizzas[0..<end])
+        
         DispatchQueue.main.async {
             self.pizzaTableView.reloadData()
         }
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        PizzaService.getPizzas() {
-            pizzas in
-            self.pizzas = pizzas
-            DispatchQueue.main.async {
-                self.pizzaTableView.reloadData()
-            }
-        }
+        fetchPizzas(count: Preferences.pizzaCount, order: order)
     }
     
     
@@ -97,15 +98,15 @@ extension TopPizzasViewController: UITableViewDataSource {
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print(searchText)
-        if searchText == "" {
+        if searchBar.text == nil || searchText == "" {
             isSearching = false
             view.endEditing(true)
-            pizzaTableView.reloadData()
+            fetchPizzas(count: Preferences.pizzaCount, order: order)
         } else {
             isSearching = true
-           pizzas = allPizzas.filter(
-            {( pizza: Pizza, int: Int) -> Bool in return pizza.toppings.joined().lowercased().contains(searchText.lowercased())})
+            self.searchText = searchText
+            fetchPizzas(count: allPizzas.count, order: order)
+            pizzas = pizzas.filter({( pizza: Pizza, int: Int) -> Bool in return pizza.toppings.joined().lowercased().contains(searchText.lowercased())})
             let end = min(Preferences.pizzaCount, self.pizzas.count)
             pizzas = Array(pizzas[0..<end])
             pizzaTableView.reloadData()
