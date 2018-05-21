@@ -24,9 +24,7 @@ class PizzaService {
     static let pizzaTopRef = Database.database().reference(withPath: Keys.pizzaToppings)
     static let ordersRef = Database.database().reference(withPath: Keys.orders)
     
-//    static var persistentContainer: NSPersistentContainer = {
-//        return UIApplication.appDelegate.persistentContainer
-//    }()
+
 
     class func getPizzas(completion: @escaping PizzaHandler){
         DispatchQueue.global(qos: .userInitiated).async {
