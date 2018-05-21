@@ -45,10 +45,8 @@ class ToppingsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        let top = ["Pepperoni", "Ham", "Pineapple"]//, "Olives", "Peppers", "Bacon", "Chicken", "Spinach"]
-//        Preferences.toppingsRef.setValue(top)
-
-        
+        let top = ["Pepperoni", "Ham", "Pineapple"]//, "Olives", "Peppers", "Bacon", "Chicken", "Spinach"]
+        Preferences.toppingsRef.setValue(top)
         Preferences.getToppings(){[weak self] toppings in
             self?.toppings = toppings
         }

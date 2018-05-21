@@ -52,11 +52,35 @@
 
 
 import Foundation
+import Firebase
 
-struct Pizza: Decodable {
-
+struct Pizza {
+    
     var toppings: [String]
-    var price: Int?
+    var price: Int
+    var numOfOrders: Int = 0
+    var toppingString: String {
+        return toppings.joined(separator: ", ")
+    }
+    
+    init(toppings: [String], price: Int = 0) {
+        self.toppings = toppings
+        self.price = price
+    }
+    
+    init?(snapshot: DataSnapshot) {
+        guard
+            let value = snapshot.value as? [String: AnyObject],
+            let toppings = value["toppings"] as? [String],
+            let price = value["price"] as? Int,
+            let numOfOrders = value["numOforders"] as? Int else {
+                return nil
+        }
+        
+        self.toppings = toppings.sorted()
+        self.price = price
+        self.numOfOrders = numOfOrders
+    }
 }
 
 
@@ -84,6 +108,6 @@ extension Pizza: Comparable {
 extension Pizza: Hashable {
     
     var hashValue: Int {
-        return toppings.sorted().joined().hashValue
+        return toppingString.hashValue
     }
 }

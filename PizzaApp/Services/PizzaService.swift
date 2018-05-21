@@ -27,29 +27,29 @@ class PizzaService {
 
 
     class func getPizzas(completion: @escaping PizzaHandler){
-        DispatchQueue.global(qos: .userInitiated).async {
-            guard let path = Bundle.main.path(
-                forResource: "pizzas",
-                ofType: "json") else {
-                return
-            }
-            let fileURL = URL(fileURLWithPath: path)
-            
-            var pizzas: [Pizza]
-            do {
-                let data = try Data(contentsOf: fileURL)
-                pizzas = try JSONDecoder().decode([Pizza].self, from: data)
-            } catch  {
-                print(error.localizedDescription)
-                return
+        PizzaService.pizzaTopRef.observe(.value, with: { snapshot in
+            var pizzas = [Pizza: Int]()
+            for child in snapshot.children {
+                if let snapshot = child as? DataSnapshot,
+                    let pizza = Pizza(snapshot: snapshot) {
+                        print(pizza.toppings)
+                    pizzas[pizza] = pizza.numOfOrders
+                }
             }
             
-            let counts = pizzas.reduce(into: [Pizza: Int]()){ $0[$1, default: 0] += 1}
-             let topPizzas = counts.sorted(by: { $0.value > $1.value })
-            // return the top N pizzas
+            let topPizzas = pizzas.sorted(by: { $0.value > $1.value })
             completion(Array(topPizzas))
-        }
+        })
     }
+    
+//    class func uploadJson(topPizzas: [Pizza: Int]){
+//            for topPizza in topPizzas {
+//                let pizza: Any = ["toppings": topPizza.key.toppings.sorted(),"price": topPizza.key.price ?? 0,"numOforders": topPizza.value]
+//                let pizzaReference = PizzaService.pizzaTopRef.child(topPizza.key.toppingString)
+//                pizzaReference.setValue(pizza)
+//            }
+//        }
+    
     
     class func updateOrder(_ order: Order){
         DispatchQueue.global(qos: .utility).async {

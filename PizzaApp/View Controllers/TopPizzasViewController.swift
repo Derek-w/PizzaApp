@@ -24,6 +24,7 @@ class TopPizzasViewController: UIViewController, UISearchBarDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         PizzaService.getPizzas() { [unowned self] pizzas in
             self.allPizzas = pizzas
             self.fetchPizzas(count: Preferences.pizzaCount, order: self.order)
