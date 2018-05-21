@@ -76,6 +76,9 @@ class ToppingsViewController: UIViewController {
     }
     
     @IBAction func pizzaOrdered(_ sender: Any) {
+        if selectedToppings.count == 0 {
+            return
+        }
         PizzaService.saveOrder(toppings: selectedToppings)
         
         toppings = (toppings + selectedToppings).sorted()
