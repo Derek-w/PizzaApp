@@ -7,12 +7,13 @@
 //
 
 import UIKit
+import Firebase
 
 class ToppingsViewController: UIViewController {
     
     @IBOutlet weak var toppingsTableView: UITableView!
     @IBOutlet weak var toppingsPickerView: UIPickerView!
-    
+        
     @IBAction func addNewTopping(_ sender: Any) {
         let alert = UIAlertController(title: "Customise", message:.none , preferredStyle: UIAlertControllerStyle.alert)
         alert.addTextField(configurationHandler: {(textField: UITextField!) in
@@ -24,8 +25,9 @@ class ToppingsViewController: UIViewController {
                                         guard let textField = alert!.textFields?[0]
                                             else { return }
                                         if textField.text != "" {
-                                            Preferences.addCtmTopping(textField.text!)
+                                            
                                             self.toppings.insert(textField.text!, at: 0)
+                                            Preferences.addCtmTopping(self.toppings)
                                             self.toppingsPickerView.reloadAllComponents()
                                         }
         }))
@@ -36,15 +38,20 @@ class ToppingsViewController: UIViewController {
     
     let cellIdentifier = "ToppingCell"
     
-    var toppings = ["Pepperoni", "Ham", "Pineapple", "Olives", "Peppers", "Bacon", "Chicken", "Spinach"]
+    var toppings = [String]()
     
     
     var selectedToppings: [String] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+//        let top = ["Pepperoni", "Ham", "Pineapple"]//, "Olives", "Peppers", "Bacon", "Chicken", "Spinach"]
+//        Preferences.toppingsRef.setValue(top)
+
         
-        toppings.append(contentsOf: Preferences.ctmToppings!)
+        Preferences.getToppings(){[weak self] toppings in
+            self?.toppings = toppings
+        }
         toppings = toppings.sorted()
     }
     
@@ -86,6 +93,16 @@ class ToppingsViewController: UIViewController {
         
         toppingsPickerView.reloadAllComponents()
         toppingsTableView.reloadData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        
+        Preferences.getToppings(){[weak self] toppings in
+            self?.toppings = toppings.sorted()
+            self?.toppingsPickerView.reloadAllComponents()
+        }
+        
     }
 }
 

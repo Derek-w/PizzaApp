@@ -22,7 +22,6 @@ class SettingsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         numberLabel.text = String(Preferences.pizzaCount)
         slider.value = Float(Preferences.pizzaCount)
     }
